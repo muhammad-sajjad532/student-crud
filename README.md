@@ -4,6 +4,9 @@ A small standalone Angular Student CRUD application used to demonstrate Vitest, 
 
 ## Setup
 
+For local Windows hosting without a running Node terminal, see
+[IIS deployment instructions](docs/IIS-DEPLOYMENT.md). Build with `npm run build:iis`.
+
 Use Node.js 24.18.0 (the same version as CI) and npm. From this directory:
 
 ```sh

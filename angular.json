@@ -41,6 +41,10 @@
             }
           },
           "configurations": {
+            "iis": {
+              "outputMode": "static",
+              "outputPath": "dist/angular-testing-iis"
+            },
             "production": {
               "budgets": [
                 {

@@ -5,6 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build:iis": "ng build --configuration production,iis",
     "watch": "ng build --watch --configuration development",
     "pretest": "node scripts/clean-reports.mjs results",
     "test": "ng test --no-watch",
