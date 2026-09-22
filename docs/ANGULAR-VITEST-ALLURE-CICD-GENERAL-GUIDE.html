@@ -1,0 +1,827 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Angular Testing and Quality Automation — Implementation Handbook</title>
+    <style>
+      :root { --ink:#182238; --muted:#5f697b; --blue:#3157d5; --navy:#18316f; --green:#0d8d6e; --soft:#eef2ff; --line:#d8deea; --code:#111827; }
+      * { box-sizing:border-box; }
+      @page { size:A4; margin:17mm 15mm 18mm; }
+      html { font-size:10.4pt; }
+      body { margin:0; color:var(--ink); background:#fff; font-family:"Segoe UI",Arial,sans-serif; line-height:1.5; }
+      h1,h2,h3,h4 { color:#14204a; line-height:1.2; page-break-after:avoid; }
+      h1 { margin:0 0 13px; font-size:29pt; letter-spacing:-.45px; }
+      h2 { margin:29px 0 12px; padding-bottom:6px; border-bottom:2px solid var(--soft); font-size:18pt; }
+      h3 { margin:20px 0 8px; font-size:12.5pt; }
+      h4 { margin:15px 0 6px; font-size:10.5pt; }
+      p { margin:7px 0 11px; }
+      a { color:var(--navy); text-decoration:none; }
+      code { font:9pt Consolas,"Courier New",monospace; }
+      pre { margin:9px 0 14px; padding:11px 13px; color:#edf2ff; background:var(--code); border-radius:7px; white-space:pre-wrap; overflow-wrap:anywhere; page-break-inside:avoid; }
+      table { width:100%; margin:10px 0 17px; border-collapse:collapse; font-size:9pt; }
+      th { color:#fff; background:var(--navy); text-align:left; }
+      th,td { padding:7px 8px; border:1px solid var(--line); vertical-align:top; }
+      tr:nth-child(even) td { background:#f8f9fc; }
+      ul,ol { margin:7px 0 13px 20px; padding:0; }
+      li { margin:4px 0; }
+      .cover { min-height:245mm; display:flex; flex-direction:column; justify-content:space-between; padding:20mm 10mm 10mm; page-break-after:always; background:linear-gradient(145deg,#f1f4ff 0%,#fff 58%); }
+      .cover-mark { width:78px; height:8px; margin-bottom:28px; background:var(--blue); border-radius:99px; }
+      .eyebrow { color:var(--blue); font-size:10pt; font-weight:700; letter-spacing:1.15px; text-transform:uppercase; }
+      .subtitle { max-width:670px; color:var(--muted); font-size:14.5pt; }
+      .cover-meta { padding-top:18px; border-top:1px solid var(--line); color:var(--muted); }
+      .toc { page-break-after:always; }
+      .toc ol { columns:2; column-gap:42px; list-style-position:inside; }
+      .toc li { padding:5px 0; border-bottom:1px dotted var(--line); break-inside:avoid; }
+      .callout { margin:12px 0 16px; padding:11px 14px; border-left:4px solid var(--blue); background:var(--soft); border-radius:0 7px 7px 0; page-break-inside:avoid; }
+      .success { border-left-color:var(--green); background:#edf9f5; }
+      .warning { border-left-color:#d68b16; background:#fff8e9; }
+      .flow { display:grid; grid-template-columns:1fr auto 1fr auto 1fr; gap:8px; align-items:center; margin:15px 0; page-break-inside:avoid; }
+      .flow div { padding:11px 7px; text-align:center; background:var(--soft); border:1px solid #cbd4fa; border-radius:8px; font-weight:600; }
+      .flow .arrow { padding:0; color:var(--blue); background:transparent; border:0; font-size:17pt; }
+      .two-col { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+      .card { padding:13px; border:1px solid var(--line); border-radius:9px; page-break-inside:avoid; }
+      .card h3 { margin-top:0; }
+      .page-break { page-break-before:always; }
+      .small { color:var(--muted); font-size:8.6pt; }
+      .status { display:inline-block; padding:2px 7px; color:#08644f; background:#dff6ef; border-radius:99px; font-size:8.5pt; font-weight:700; }
+      .footer-note { margin-top:30px; padding-top:10px; border-top:1px solid var(--line); color:var(--muted); font-size:8.5pt; }
+      @media print { table,.card,.callout,pre { break-inside:avoid; } h2 { break-after:avoid; } a { color:inherit; } }
+    </style>
+  </head>
+  <body>
+    <section class="cover">
+      <div>
+        <div class="cover-mark"></div>
+        <div class="eyebrow">Reusable Engineering Handbook</div>
+        <h1>Angular Testing and Quality Automation</h1>
+        <p class="subtitle">A project-independent, step-by-step implementation guide for Vitest, Angular TestBed, code coverage, Allure reports, quality gates, GitHub Actions and optional IIS deployment.</p>
+      </div>
+      <div class="cover-meta">
+        <p><strong>Use this guide for:</strong> new Angular applications or existing applications migrating to Vitest</p>
+        <p><strong>Audience:</strong> beginners, developers, reviewers and CI/CD maintainers</p>
+        <p><strong>Edition:</strong> 1.0 &nbsp; | &nbsp; <strong>Published:</strong> September 2026</p>
+        <p><strong>Scope:</strong> concepts, implementation templates, verification and troubleshooting</p>
+      </div>
+    </section>
+
+    <section class="toc">
+      <h1>Contents</h1>
+      <ol>
+        <li>What this handbook builds</li>
+        <li>Conceptual model</li>
+        <li>Compatibility assessment</li>
+        <li>Install the toolchain</li>
+        <li>Configure Angular and Vitest</li>
+        <li>Define npm commands</li>
+        <li>Write maintainable unit tests</li>
+        <li>Components and DOM tests</li>
+        <li>Services and HTTP mocks</li>
+        <li>Pipes, directives and utilities</li>
+        <li>Coverage policy</li>
+        <li>Allure integration</li>
+        <li>Quality gates</li>
+        <li>Linting and formatting</li>
+        <li>GitHub Actions CI</li>
+        <li>Artifacts and CI diagnosis</li>
+        <li>Optional IIS deployment</li>
+        <li>Verification checklist</li>
+        <li>Troubleshooting</li>
+        <li>Rollout and maintenance</li>
+        <li>Copy-paste support scripts</li>
+        <li>Glossary and references</li>
+      </ol>
+    </section>
+
+    <main>
+      <h2>1. What this handbook builds</h2>
+      <p>This handbook describes a reusable testing platform rather than one application's tests. Replace placeholders such as <code>&lt;project-name&gt;</code>, <code>&lt;app-name&gt;</code>, <code>&lt;node-version&gt;</code> and <code>&lt;coverage-target&gt;</code> with values agreed by your team.</p>
+      <div class="callout success"><strong>Target outcome:</strong> Every developer and CI runner can install identical dependencies, run deterministic Angular unit tests, enforce coverage and test-quality rules, inspect Allure reports, build only after required checks pass and preserve diagnostic artifacts.</div>
+      <table>
+        <thead><tr><th>Layer</th><th>Question answered</th><th>Typical tool</th></tr></thead>
+        <tbody>
+          <tr><td>Unit tests</td><td>Does this behavior produce the expected result?</td><td>Vitest + Angular TestBed</td></tr>
+          <tr><td>Coverage</td><td>Which source paths were executed?</td><td>V8 coverage</td></tr>
+          <tr><td>Results</td><td>Which cases passed, failed or took time?</td><td>Allure Report</td></tr>
+          <tr><td>Static quality</td><td>Does code follow safety and style rules?</td><td>ESLint + Prettier</td></tr>
+          <tr><td>CI</td><td>Do the same checks pass on every change?</td><td>GitHub Actions</td></tr>
+          <tr><td>Delivery</td><td>Can a validated artifact be deployed?</td><td>Angular build + chosen host</td></tr>
+        </tbody>
+      </table>
+
+      <h2>2. Conceptual model</h2>
+      <div class="flow"><div>Source change</div><div class="arrow">→</div><div>Automated checks</div><div class="arrow">→</div><div>Validated build</div></div>
+      <div class="flow"><div>Vitest results</div><div class="arrow">→</div><div>Coverage + Allure</div><div class="arrow">→</div><div>Quality decision</div></div>
+      <p>Vitest decides pass or fail for assertions. Coverage measures execution. Allure visualizes results. ESLint and Prettier check maintainability. CI runs the same commands outside a developer's machine. These responsibilities overlap intentionally but are not interchangeable.</p>
+      <div class="two-col">
+        <div class="card"><h3>Continuous Integration</h3><p>Automatically validates commits and pull requests on a clean runner. The output is a pass/fail status plus diagnostic artifacts.</p></div>
+        <div class="card"><h3>Continuous Delivery/Deployment</h3><p>Packages or publishes a validated application. Deployment requires an explicit target and credentials; CI alone does not create a public URL.</p></div>
+      </div>
+
+      <h2>3. Compatibility assessment</h2>
+      <h3>3.1 Inspect the project first</h3>
+      <pre>node --version
+npm --version
+npx ng version
+npm ls vitest jsdom @angular/build</pre>
+      <p>New Angular CLI projects use Vitest and jsdom by default. Older applications may still contain Karma/Jasmine configuration. Look for:</p>
+      <table>
+        <thead><tr><th>Indicator</th><th>Meaning</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><td><code>@angular/build:unit-test</code></td><td>Modern Angular test builder</td><td>Continue with this guide.</td></tr>
+          <tr><td><code>karma.conf.js</code> or Karma builder</td><td>Existing Karma setup</td><td>Follow Angular's official Karma-to-Vitest migration before removing dependencies.</td></tr>
+          <tr><td><code>jasmine.createSpy</code></td><td>Jasmine-specific test API</td><td>Replace with <code>vi.fn()</code> or <code>vi.spyOn()</code>.</td></tr>
+          <tr><td>Custom browser APIs</td><td>jsdom may not implement required behavior</td><td>Mock the API or configure Vitest browser mode.</td></tr>
+        </tbody>
+      </table>
+      <div class="callout warning"><strong>Version rule:</strong> Keep <code>vitest</code> and <code>@vitest/coverage-v8</code> on the same major version. Use package versions compatible with the Angular version in the target repository; do not copy version numbers blindly.</div>
+
+      <h2>4. Install the toolchain</h2>
+      <h3>4.1 Create a new Angular project</h3>
+      <pre>npx @angular/cli@latest new &lt;app-name&gt; --style=scss
+cd &lt;app-name&gt;
+ng test</pre>
+      <p>Confirm the generated test passes before adding reporting or quality tooling. This creates a known-good baseline.</p>
+      <h3>4.2 Existing modern Angular project</h3>
+      <pre>npm install
+ng test</pre>
+      <h3>4.3 Install coverage and reporting</h3>
+      <pre>npm install --save-dev @vitest/coverage-v8
+npm install --save-dev allure allure-vitest allure-js-commons</pre>
+      <h3>4.4 Install quality tools when absent</h3>
+      <pre>ng add angular-eslint
+npm install --save-dev prettier @vitest/eslint-plugin globals</pre>
+      <p>Commit <code>package.json</code> and <code>package-lock.json</code>. CI should use <code>npm ci</code>, which installs the exact dependency graph recorded in the lockfile.</p>
+
+      <h2>5. Configure Angular and Vitest</h2>
+      <h3>5.1 Generate a supported base config</h3>
+      <pre>ng generate config vitest</pre>
+      <p>Angular creates a Vitest base file. Rename only if desired, then reference it from the target project's test options in <code>angular.json</code>.</p>
+      <h3>5.2 Angular test target template</h3>
+      <pre>"test": {
+  "builder": "@angular/build:unit-test",
+  "options": {
+    "progress": false,
+    "runnerConfig": "vitest.config.ts",
+    "isolate": true,
+    "coverageInclude": ["src/app/**/*.ts", "src/app/**/*.html"],
+    "coverageExclude": [
+      "**/*.spec.ts",
+      "**/*.model.ts",
+      "**/app.config*.ts",
+      "**/app.routes*.ts"
+    ],
+    "coverageReporters": ["text", "text-summary", "html", "lcov", "json-summary"],
+    "coverageThresholds": {
+      "perFile": true,
+      "statements": &lt;coverage-target&gt;,
+      "branches": &lt;coverage-target&gt;,
+      "functions": &lt;coverage-target&gt;,
+      "lines": &lt;coverage-target&gt;
+    }
+  }
+}</pre>
+      <p>Start with a target your existing codebase can honestly meet, then ratchet upward. A new small library may use 100%; a legacy application may adopt a lower baseline plus a “no decrease” policy.</p>
+      <h3>5.3 Reusable Vitest configuration</h3>
+      <pre>import { defineConfig } from 'vitest/config';
+
+export default defineConfig({
+  test: {
+    allowOnly: false,
+    passWithNoTests: false,
+    clearMocks: true,
+    restoreMocks: true,
+    retry: 0,
+    reporters: [
+      ['tree', { summary: false }],
+      ['json', { outputFile: 'test-results/vitest.json' }],
+      ['allure-vitest/reporter', {
+        resultsDir: 'allure-results',
+        environmentInfo: {
+          node_version: process.version,
+          platform: process.platform,
+          execution: process.env['CI'] ? 'CI' : 'local'
+        }
+      }]
+    ],
+    coverage: {
+      provider: 'v8',
+      reportOnFailure: true
+    }
+  }
+});</pre>
+      <table>
+        <thead><tr><th>Option</th><th>Protection</th></tr></thead>
+        <tbody>
+          <tr><td><code>allowOnly: false</code></td><td>Rejects accidentally committed focused tests.</td></tr>
+          <tr><td><code>passWithNoTests: false</code></td><td>Empty discovery cannot report success.</td></tr>
+          <tr><td><code>clearMocks</code> / <code>restoreMocks</code></td><td>Reduces cross-test state leakage.</td></tr>
+          <tr><td><code>retry: 0</code></td><td>Exposes unstable tests instead of hiding them.</td></tr>
+          <tr><td><code>reportOnFailure</code></td><td>Creates coverage evidence even when a test fails.</td></tr>
+        </tbody>
+      </table>
+
+      <h2>6. Define npm commands</h2>
+      <p>Add scripts to <code>package.json</code>. Preserve existing project-specific scripts.</p>
+      <pre>"scripts": {
+  "test": "ng test --no-watch",
+  "test:watch": "ng test --watch",
+  "test:coverage": "ng test --coverage --no-watch",
+  "test:ci": "npm run test:coverage &amp;&amp; node scripts/check-test-results.mjs",
+  "allure:generate": "allure generate allure-results --output allure-report --report-name \"Unit tests\"",
+  "allure:open": "allure open allure-report",
+  "allure:clean": "node scripts/clean-reports.mjs all",
+  "lint": "eslint . --max-warnings=0",
+  "lint:fix": "eslint . --fix",
+  "format:check": "prettier --check .",
+  "format": "prettier --write .",
+  "quality-check": "npm run lint &amp;&amp; npm run format:check &amp;&amp; npm run test:ci &amp;&amp; npm run allure:generate &amp;&amp; npm run build"
+}</pre>
+      <p>Add <code>pretest</code>, <code>pretest:coverage</code> and <code>preallure:generate</code> cleanup hooks when repeatable report output is required. Do not clean results while a watch session is writing into them.</p>
+
+      <h2 class="page-break">7. Write maintainable unit tests</h2>
+      <h3>7.1 Arrange–Act–Assert</h3>
+      <pre>it('calculates the discounted total', () =&gt; {
+  // Arrange
+  const price = 100;
+  const discount = 20;
+
+  // Act
+  const result = calculateDiscount(price, discount);
+
+  // Assert
+  expect(result).toBe(80);
+});</pre>
+      <h3>7.2 Naming convention</h3>
+      <p>Use <code>*.spec.ts</code> beside the source file. Test names should describe observable behavior, for example <em>should reject an empty email</em>. Avoid vague names such as <em>test 1</em>.</p>
+      <h3>7.3 Scenario selection</h3>
+      <table>
+        <thead><tr><th>Scenario</th><th>Example</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td>Positive</td><td>Valid form submits</td><td>Confirms expected behavior.</td></tr>
+          <tr><td>Negative</td><td>Empty required field is rejected</td><td>Confirms validation and safe failure.</td></tr>
+          <tr><td>Boundary</td><td>Zero, maximum length, first/last item</td><td>Checks behavior at limits.</td></tr>
+          <tr><td>State transition</td><td>Edit → cancel → add mode</td><td>Confirms related state resets correctly.</td></tr>
+          <tr><td>Dependency failure</td><td>HTTP 500 response</td><td>Confirms error handling.</td></tr>
+        </tbody>
+      </table>
+      <h3>7.4 Independence rules</h3>
+      <ul>
+        <li>Create fresh state in <code>beforeEach</code>.</li>
+        <li>Do not depend on test execution order.</li>
+        <li>Do not call real production APIs.</li>
+        <li>Control clocks, randomness and asynchronous work.</li>
+        <li>Restore fake timers and spies.</li>
+        <li>Assert outcomes, not private implementation details.</li>
+      </ul>
+
+      <h2>8. Components and DOM tests</h2>
+      <h3>8.1 Standalone component setup</h3>
+      <pre>import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ProfileComponent } from './profile.component';
+
+describe('ProfileComponent', () =&gt; {
+  let fixture: ComponentFixture&lt;ProfileComponent&gt;;
+  let component: ProfileComponent;
+
+  beforeEach(async () =&gt; {
+    await TestBed.configureTestingModule({
+      imports: [ProfileComponent]
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(ProfileComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('creates the component', () =&gt; {
+    expect(component).toBeTruthy();
+  });
+});</pre>
+      <h3>8.2 User-facing DOM behavior</h3>
+      <pre>it('submits the entered name', async () =&gt; {
+  const page: HTMLElement = fixture.nativeElement;
+  const input = page.querySelector&lt;HTMLInputElement&gt;('#name')!;
+
+  input.value = 'Ayesha';
+  input.dispatchEvent(new Event('input', { bubbles: true }));
+  page.querySelector&lt;HTMLButtonElement&gt;('button[type="submit"]')!.click();
+  await fixture.whenStable();
+
+  expect(page.textContent).toContain('Ayesha');
+});</pre>
+      <p>Prefer accessible selectors such as labels, roles and meaningful <code>aria-label</code> values. Verify rendered behavior as well as component state when the template is part of the requirement.</p>
+
+      <h2>9. Services and HTTP mocks</h2>
+      <h3>9.1 Pure service</h3>
+      <pre>describe('PriceService', () =&gt; {
+  let service: PriceService;
+
+  beforeEach(() =&gt; {
+    TestBed.configureTestingModule({});
+    service = TestBed.inject(PriceService);
+  });
+
+  it('applies tax', () =&gt; {
+    expect(service.withTax(100, 0.15)).toBe(115);
+  });
+});</pre>
+      <h3>9.2 HTTP service</h3>
+      <pre>beforeEach(() =&gt; {
+  TestBed.configureTestingModule({
+    providers: [
+      UserService,
+      provideHttpClient(),
+      provideHttpClientTesting()
+    ]
+  });
+  service = TestBed.inject(UserService);
+  http = TestBed.inject(HttpTestingController);
+});
+
+afterEach(() =&gt; http.verify());
+
+it('loads users', () =&gt; {
+  service.getUsers().subscribe(users =&gt; {
+    expect(users).toEqual([{ id: 1, name: 'Ayesha' }]);
+  });
+
+  const request = http.expectOne('/api/users');
+  expect(request.request.method).toBe('GET');
+  request.flush([{ id: 1, name: 'Ayesha' }]);
+});
+
+it('propagates server failure', () =&gt; {
+  service.getUsers().subscribe({
+    error: error =&gt; expect(error.status).toBe(500)
+  });
+  http.expectOne('/api/users').flush('Failed', {
+    status: 500,
+    statusText: 'Server Error'
+  });
+});</pre>
+      <p><code>HttpTestingController</code> prevents real network access and makes the response deterministic. <code>verify()</code> ensures no unexpected request remains.</p>
+
+      <h2>10. Pipes, directives and utilities</h2>
+      <h3>10.1 Pure pipe</h3>
+      <pre>it('formats a display name', () =&gt; {
+  const pipe = new DisplayNamePipe();
+  expect(pipe.transform('ayesha', 'khan')).toBe('Ayesha Khan');
+});</pre>
+      <h3>10.2 Directive through a host</h3>
+      <pre>@Component({
+  imports: [HighlightDirective],
+  template: '&lt;p appHighlight&gt;Text&lt;/p&gt;'
+})
+class HostComponent {}
+
+it('applies highlight styling', () =&gt; {
+  const fixture = TestBed.createComponent(HostComponent);
+  fixture.detectChanges();
+  const element = fixture.nativeElement.querySelector('p');
+  expect(element.style.backgroundColor).toBe('yellow');
+});</pre>
+      <h3>10.3 Utility function</h3>
+      <p>Test utilities directly without TestBed. Include normal, invalid and boundary values. Angular infrastructure adds no value to a pure function test.</p>
+
+      <h2>11. Coverage policy</h2>
+      <table>
+        <thead><tr><th>Metric</th><th>What it measures</th><th>Common gap</th></tr></thead>
+        <tbody>
+          <tr><td>Statements</td><td>Executable instructions reached</td><td>Early-return validation not tested</td></tr>
+          <tr><td>Branches</td><td>Conditional alternatives reached</td><td>Only success path covered</td></tr>
+          <tr><td>Functions</td><td>Functions/handlers invoked</td><td>Unused callback or UI handler</td></tr>
+          <tr><td>Lines</td><td>Executable lines reached</td><td>Error handling line not reached</td></tr>
+        </tbody>
+      </table>
+      <pre>npm run test:coverage</pre>
+      <p>Open the generated HTML report under <code>coverage/&lt;project-name&gt;/index.html</code>. Treat exclusions as reviewed policy. Do not exclude difficult business logic simply to raise the percentage. Coverage does not prove requirements are correct; assertions and scenario selection do.</p>
+
+      <h2>12. Allure integration</h2>
+      <div class="flow"><div>Test execution</div><div class="arrow">→</div><div>allure-results</div><div class="arrow">→</div><div>HTML report</div></div>
+      <h3>12.1 Add report metadata</h3>
+      <pre>import * as allure from 'allure-js-commons';
+
+beforeEach(async () =&gt; {
+  await allure.epic('Customer portal');
+  await allure.feature('User profile');
+  await allure.severity('normal');
+});</pre>
+      <h3>12.2 Generate and view</h3>
+      <pre>npm test
+npm run allure:generate
+npm run allure:open</pre>
+      <p><code>allure:generate</code> converts raw result files; it does not rerun tests. The viewer starts a local report server. Stop it with <code>Ctrl+C</code>. Avoid placing passwords, tokens or real customer data in attachments and parameters.</p>
+
+      <h2>13. Quality gates</h2>
+      <h3>13.1 Result validation script</h3>
+      <p>Create <code>scripts/check-test-results.mjs</code>. At minimum, read <code>test-results/vitest.json</code> and fail when there are zero tests, failures, skipped/todo results or an inconsistent count. Also compare Allure result count and require name, suite, status and timing metadata.</p>
+      <pre>import { readFileSync } from 'node:fs';
+
+const report = JSON.parse(
+  readFileSync('test-results/vitest.json', 'utf8')
+);
+const tests = report.testResults.flatMap(
+  suite =&gt; suite.assertionResults
+);
+const incomplete = tests.filter(test =&gt; test.status !== 'passed');
+
+if (!report.success || tests.length === 0 || incomplete.length) {
+  throw new Error(
+    'Quality gate failed: every discovered test must pass; skips are not allowed.'
+  );
+}</pre>
+      <h3>13.2 Safe cleanup</h3>
+      <p>Delete only fixed generated directories such as <code>coverage</code>, <code>test-results</code>, <code>allure-results</code> and <code>allure-report</code>. Never accept an arbitrary deletion path from a command argument. Reject symbolic links and paths outside the repository.</p>
+      <h3>13.3 Gate sequence</h3>
+      <div class="flow"><div>Lint + format</div><div class="arrow">→</div><div>Tests + coverage</div><div class="arrow">→</div><div>Report + build</div></div>
+      <p>Run the production build only after required checks succeed. A test report being visually green does not override a failed coverage or lint gate.</p>
+
+      <h2>14. Linting and formatting</h2>
+      <p>Apply Angular ESLint recommendations to TypeScript and templates. Add Vitest rules to spec files:</p>
+      <pre>{
+  files: ['**/*.spec.ts'],
+  plugins: { vitest },
+  languageOptions: {
+    globals: vitest.environments.env.globals
+  },
+  rules: {
+    ...vitest.configs.recommended.rules,
+    'vitest/no-disabled-tests': 'error',
+    'vitest/no-focused-tests': 'error'
+  }
+}</pre>
+      <p>Ignore generated directories in ESLint, Prettier and Git:</p>
+      <pre>node_modules/
+.angular/
+dist/
+coverage/
+test-results/
+allure-results/
+allure-report/</pre>
+      <p><code>npm run format:check</code> reports differences without editing files. <code>npm run format</code> modifies maintained source files.</p>
+
+      <h2 class="page-break">15. GitHub Actions CI</h2>
+      <p>Create <code>.github/workflows/quality.yml</code>. Store the team-approved Node version in <code>.nvmrc</code>, or replace <code>node-version-file</code> with a fixed version.</p>
+      <pre>name: Quality checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CI: 'true'
+      NG_CLI_ANALYTICS: 'false'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Check formatting
+        run: npm run format:check
+
+      - name: Test, coverage and result gates
+        id: tests
+        run: npm run test:ci
+
+      - name: Generate Allure report
+        if: ${{ !cancelled() &amp;&amp; steps.tests.outcome != 'skipped' }}
+        run: npm run allure:generate
+
+      - name: Production build
+        run: npm run build
+
+      - name: Preserve reports
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            coverage/
+            test-results/
+            allure-results/
+            allure-report/
+          if-no-files-found: warn
+          retention-days: 14</pre>
+      <h3>15.1 What each CI step proves</h3>
+      <table>
+        <thead><tr><th>Step</th><th>Evidence</th></tr></thead>
+        <tbody>
+          <tr><td>Checkout</td><td>The runner uses the committed repository state.</td></tr>
+          <tr><td>Setup Node</td><td>Local and CI runtime versions can be aligned.</td></tr>
+          <tr><td><code>npm ci</code></td><td>The lockfile installs successfully from scratch.</td></tr>
+          <tr><td>Lint/format</td><td>Static quality standards are met.</td></tr>
+          <tr><td>Test gate</td><td>Behavior, coverage and result-completeness rules pass.</td></tr>
+          <tr><td>Build</td><td>The validated source compiles for production.</td></tr>
+          <tr><td>Artifact upload</td><td>Evidence is retained for investigation and review.</td></tr>
+        </tbody>
+      </table>
+      <h3>15.2 Repository controls</h3>
+      <p>After the workflow passes, configure branch protection so the <em>quality</em> job is required before merge. Limit workflow permissions and store deployment secrets in GitHub environments or repository secrets, never in source files.</p>
+
+      <h2>16. Artifacts and CI diagnosis</h2>
+      <ol>
+        <li>Open the repository's <strong>Actions</strong> tab.</li>
+        <li>Select the workflow run associated with the commit.</li>
+        <li>Open the job and start with the first red step.</li>
+        <li>Read the assertion, lint, threshold or compiler error.</li>
+        <li>Download report artifacts for deeper inspection.</li>
+        <li>Reproduce the same npm command locally.</li>
+        <li>Fix the cause; do not disable the gate simply to make the run green.</li>
+      </ol>
+      <p>An artifact SHA-256 value is an integrity fingerprint. It is not a website address. Uploaded reports are retained files; they are not automatically public Allure hosting.</p>
+
+      <h2>17. Optional IIS deployment</h2>
+      <p>This section applies when the Angular application can be deployed as static HTML, CSS and JavaScript on a Windows machine. SSR applications require a Node process or a supported reverse-proxy design.</p>
+      <h3>17.1 Create a static build configuration</h3>
+      <pre>"configurations": {
+  "iis": {
+    "outputMode": "static",
+    "outputPath": "dist/&lt;app-name&gt;-iis"
+  }
+}</pre>
+      <pre>"build:iis": "ng build --configuration production,iis"</pre>
+      <h3>17.2 Enable IIS</h3>
+      <p>Run from Administrator PowerShell:</p>
+      <pre>Enable-WindowsOptionalFeature -Online `
+  -FeatureName IIS-WebServerRole,IIS-WebServer,IIS-CommonHttpFeatures,IIS-StaticContent,IIS-DefaultDocument,IIS-ManagementConsole `
+  -All -NoRestart</pre>
+      <h3>17.3 Publish files</h3>
+      <pre>npm run build:iis
+
+New-Item -ItemType Directory `
+  -Path "C:\inetpub\&lt;app-name&gt;" -Force
+
+Copy-Item `
+  -Path ".\dist\&lt;app-name&gt;-iis\browser\*" `
+  -Destination "C:\inetpub\&lt;app-name&gt;" `
+  -Recurse -Force</pre>
+      <h3>17.4 Site configuration</h3>
+      <ul>
+        <li>Create a dedicated application pool with <em>No Managed Code</em>.</li>
+        <li>Create a site bound to an unused port, for example <code>127.0.0.1:8080</code>.</li>
+        <li>Enable Anonymous Authentication using the application-pool identity.</li>
+        <li>Grant that identity Read and Execute permissions on the site folder.</li>
+        <li>Ensure <code>index.html</code> is a default document.</li>
+        <li>For client-side routes, add a reviewed URL Rewrite fallback to <code>index.html</code>.</li>
+      </ul>
+      <pre>icacls "C:\inetpub\&lt;app-name&gt;" `
+  /grant "IIS AppPool\&lt;pool-name&gt;:(OI)(CI)(RX)" /T
+
+curl.exe -i http://127.0.0.1:8080/</pre>
+      <div class="callout"><strong>Scope:</strong> IIS on a developer workstation is a local deployment. It remains available when the IDE and Node terminal are closed, but only while Windows and IIS are running. It is not automatically public.</div>
+
+      <h2>18. Verification checklist</h2>
+      <table>
+        <thead><tr><th>Requirement</th><th>Manual verification</th><th>Expected result</th></tr></thead>
+        <tbody>
+          <tr><td>Locked install</td><td><code>npm ci</code></td><td>Clean installation succeeds.</td></tr>
+          <tr><td>Tests</td><td><code>npm test</code></td><td>All discovered cases pass.</td></tr>
+          <tr><td>Watch mode</td><td><code>npm run test:watch</code>, edit a spec</td><td>Affected tests rerun.</td></tr>
+          <tr><td>Coverage</td><td><code>npm run test:coverage</code></td><td>Reports created and thresholds pass.</td></tr>
+          <tr><td>No skipped tests</td><td>Temporarily add <code>it.skip</code></td><td>Lint or result gate fails.</td></tr>
+          <tr><td>No focused tests</td><td>Temporarily add <code>it.only</code></td><td>Vitest or lint fails.</td></tr>
+          <tr><td>Allure</td><td>Generate and open report</td><td>Suites, status and duration appear.</td></tr>
+          <tr><td>Quality pipeline</td><td><code>npm run quality-check</code></td><td>All gates and build pass in order.</td></tr>
+          <tr><td>CI</td><td>Push a branch or open a PR</td><td>GitHub quality job succeeds.</td></tr>
+          <tr><td>Artifacts</td><td>Download from workflow run</td><td>Coverage and Allure outputs exist.</td></tr>
+          <tr><td>IIS</td><td>Stop Node/IDE, refresh local URL</td><td>Static application remains available.</td></tr>
+        </tbody>
+      </table>
+      <div class="callout warning"><strong>Probe-test rule:</strong> Run deliberate failure experiments only on a temporary branch or uncommitted change, then remove them and run the complete pipeline again.</div>
+
+      <h2>19. Troubleshooting</h2>
+      <table>
+        <thead><tr><th>Problem</th><th>Likely cause</th><th>Resolution</th></tr></thead>
+        <tbody>
+          <tr><td>Coverage package missing</td><td><code>@vitest/coverage-v8</code> absent or incompatible</td><td>Install a version matching the Vitest major.</td></tr>
+          <tr><td>No tests found</td><td>Wrong file suffix/path or builder config</td><td>Use <code>*.spec.ts</code>; review include/exclude settings.</td></tr>
+          <tr><td>Test passes alone but fails in suite</td><td>Shared state, mock or timer leakage</td><td>Fresh setup; restore mocks/timers; remove ordering dependency.</td></tr>
+          <tr><td>DOM does not update</td><td>Angular work has not settled</td><td>Use <code>detectChanges()</code> or await <code>whenStable()</code>.</td></tr>
+          <tr><td>Allure report is empty</td><td>Reporter missing or wrong results directory</td><td>Run tests first; verify reporter and paths.</td></tr>
+          <tr><td>Old results appear</td><td>Raw results were not cleaned</td><td>Clean generated directories before a final run.</td></tr>
+          <tr><td>Local passes, CI fails</td><td>Runtime, case sensitivity or lockfile difference</td><td>Match Node versions; use <code>npm ci</code>; inspect first failed step.</td></tr>
+          <tr><td>Windows <code>EPERM</code> during install</td><td>A process holds a dependency binary</td><td>Stop dev/watch sessions, then rerun installation.</td></tr>
+          <tr><td>IIS HTTP 401</td><td>Anonymous module/identity/ACL problem</td><td>Verify authentication modules and grant pool identity RX access.</td></tr>
+          <tr><td>IIS site state <code>Unknown</code></td><td>WAS has stale runtime configuration</td><td>Restart WAS and W3SVC in the correct order.</td></tr>
+        </tbody>
+      </table>
+
+      <h2>20. Rollout and maintenance</h2>
+      <h3>20.1 Adoption sequence</h3>
+      <ol>
+        <li>Record the current Angular, Node and existing test setup.</li>
+        <li>Make the base Vitest suite pass before adding gates.</li>
+        <li>Add coverage and agree an honest threshold.</li>
+        <li>Add Allure reporting and deterministic cleanup.</li>
+        <li>Add lint/format rules and remove obsolete tests.</li>
+        <li>Add the complete local quality command.</li>
+        <li>Add GitHub Actions and verify both success and failure paths.</li>
+        <li>Make the CI job required in branch protection.</li>
+        <li>Add delivery only after the validation pipeline is stable.</li>
+      </ol>
+      <h3>20.2 Definition of done for every change</h3>
+      <ul>
+        <li>New behavior has positive, negative and relevant edge cases.</li>
+        <li>External dependencies are mocked at the boundary.</li>
+        <li>No test depends on execution order or real production data.</li>
+        <li>Lint, format, tests, coverage and build pass locally.</li>
+        <li>CI passes on the pushed commit.</li>
+        <li>Reports contain no skipped, stale or missing results.</li>
+        <li>Documentation and commands remain accurate.</li>
+      </ul>
+      <h3>20.3 Review principles</h3>
+      <p>Prefer tests that express business behavior over tests that mirror implementation. Review exclusions and thresholds periodically. Upgrade dependencies in controlled pull requests. Re-run the failure probes after major runner, Angular or reporting upgrades.</p>
+
+      <h2 class="page-break">21. Copy-paste support scripts</h2>
+      <h3>21.1 Safe report cleanup</h3>
+      <p>Create <code>scripts/clean-reports.mjs</code>:</p>
+      <pre>import { lstatSync, mkdirSync, realpathSync, rmSync } from 'node:fs';
+import { dirname, isAbsolute, join, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const root = realpathSync(join(dirname(fileURLToPath(import.meta.url)), '..'));
+const groups = {
+  results: ['allure-results', 'test-results', 'coverage'],
+  report: ['allure-report'],
+  all: ['allure-results', 'allure-report', 'test-results', 'coverage']
+};
+
+const group = process.argv[2] ?? 'all';
+if (!Object.hasOwn(groups, group)) {
+  throw new Error('Use results, report, or all.');
+}
+
+for (const name of groups[group]) {
+  const target = join(root, name);
+  const withinRoot = relative(root, target);
+
+  if (!withinRoot || withinRoot.startsWith('..') || isAbsolute(withinRoot)) {
+    throw new Error(`Refusing to clean outside the project: ${target}`);
+  }
+
+  const stat = lstatSync(target, { throwIfNoEntry: false });
+  if (stat?.isSymbolicLink()) {
+    throw new Error(`Refusing to clean a linked directory: ${target}`);
+  }
+
+  if (stat &amp;&amp; realpathSync(target) !== target) {
+    throw new Error(`Unexpected resolved path: ${target}`);
+  }
+
+  rmSync(target, { recursive: true, force: true });
+  console.log(`Cleaned ${name}`);
+}
+
+mkdirSync(join(root, 'test-results'), { recursive: true });</pre>
+      <p>Add cleanup hooks to <code>package.json</code>:</p>
+      <pre>"pretest": "node scripts/clean-reports.mjs results",
+"pretest:watch": "node scripts/clean-reports.mjs results",
+"pretest:coverage": "node scripts/clean-reports.mjs results",
+"preallure:generate": "node scripts/clean-reports.mjs report"</pre>
+      <h3>21.2 Test and Allure completeness gate</h3>
+      <p>Create <code>scripts/check-test-results.mjs</code>:</p>
+      <pre>import { readFileSync, readdirSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+
+const root = new URL('../', import.meta.url);
+const report = JSON.parse(
+  readFileSync(new URL('test-results/vitest.json', root), 'utf8')
+);
+const tests = report.testResults.flatMap(suite =&gt; suite.assertionResults);
+const incomplete = tests.filter(test =&gt; test.status !== 'passed');
+
+if (
+  !report.success ||
+  report.numTotalTests === 0 ||
+  tests.length !== report.numTotalTests ||
+  report.numPassedTests !== report.numTotalTests ||
+  incomplete.length &gt; 0
+) {
+  for (const test of incomplete) {
+    console.error(`${test.status}: ${test.fullName}`);
+  }
+  throw new Error(
+    'Every discovered test must pass. Skipped/todo tests are not allowed.'
+  );
+}
+
+const resultsDirectory = new URL('allure-results/', root);
+const results = readdirSync(resultsDirectory)
+  .filter(name =&gt; name.endsWith('-result.json'))
+  .map(name =&gt;
+    JSON.parse(readFileSync(new URL(name, resultsDirectory), 'utf8'))
+  );
+
+const invalidAllureResult = results.some(result =&gt;
+  result.status !== 'passed' ||
+  !Number.isFinite(result.start) ||
+  !Number.isFinite(result.stop) ||
+  !result.fullName ||
+  !result.labels?.some(label =&gt;
+    ['parentSuite', 'suite', 'subSuite'].includes(label.name)
+  )
+);
+
+if (results.length !== tests.length || invalidAllureResult) {
+  throw new Error(
+    'Allure must contain a passing, timed, named result with a suite for every test.'
+  );
+}
+
+console.log(
+  `Quality gate passed: ${tests.length} tests passed, none skipped.`
+);
+console.log(`Allure results: ${fileURLToPath(resultsDirectory)}`);</pre>
+      <h3>21.3 Full ESLint outline</h3>
+      <p>Adapt package imports to the versions selected by your project:</p>
+      <pre>import eslint from '@eslint/js';
+import tseslint from 'typescript-eslint';
+import angular from 'angular-eslint';
+import vitest from '@vitest/eslint-plugin';
+import globals from 'globals';
+
+export default tseslint.config(
+  {
+    ignores: [
+      'node_modules/**', '.angular/**', 'dist/**', 'coverage/**',
+      'allure-results/**', 'allure-report/**', 'test-results/**'
+    ]
+  },
+  {
+    files: ['**/*.ts'],
+    extends: [
+      eslint.configs.recommended,
+      ...tseslint.configs.recommended,
+      ...angular.configs.tsRecommended
+    ],
+    processor: angular.processInlineTemplates,
+    languageOptions: { globals: { ...globals.node, ...globals.browser } }
+  },
+  {
+    files: ['src/**/*.html'],
+    extends: [
+      ...angular.configs.templateRecommended,
+      ...angular.configs.templateAccessibility
+    ]
+  },
+  {
+    files: ['**/*.spec.ts'],
+    plugins: { vitest },
+    languageOptions: { globals: vitest.environments.env.globals },
+    rules: {
+      ...vitest.configs.recommended.rules,
+      'vitest/no-disabled-tests': 'error',
+      'vitest/no-focused-tests': 'error'
+    }
+  }
+);</pre>
+      <div class="callout warning"><strong>Template notice:</strong> These files are implementation starting points. Run them in the target repository, review paths and generated JSON shapes, and keep dependency versions locked. Major upgrades can change configuration APIs or reporter output.</div>
+
+      <h2>22. Glossary and references</h2>
+      <table>
+        <thead><tr><th>Term</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td>Assertion</td><td>A statement of the expected result.</td></tr>
+          <tr><td>Mock</td><td>A controlled replacement for a dependency.</td></tr>
+          <tr><td>Fixture</td><td>Angular wrapper around a component instance and rendered DOM.</td></tr>
+          <tr><td>Coverage</td><td>Measurement of source executed by tests.</td></tr>
+          <tr><td>Quality gate</td><td>A rule that returns failure when a standard is not met.</td></tr>
+          <tr><td>Reporter</td><td>A component that formats or stores test results.</td></tr>
+          <tr><td>Artifact</td><td>A file bundle retained from a CI run.</td></tr>
+          <tr><td>Runner</td><td>The machine that executes a CI job.</td></tr>
+          <tr><td>CI</td><td>Automated validation of integrated changes.</td></tr>
+          <tr><td>CD</td><td>Automated delivery or deployment of validated software.</td></tr>
+        </tbody>
+      </table>
+      <h3>Primary references</h3>
+      <ul>
+        <li><a href="https://angular.dev/guide/testing">Angular unit testing</a></li>
+        <li><a href="https://angular.dev/guide/testing/code-coverage">Angular code coverage</a></li>
+        <li><a href="https://angular.dev/guide/testing/migrating-to-vitest">Angular Karma-to-Vitest migration</a></li>
+        <li><a href="https://vitest.dev/config/">Vitest configuration</a></li>
+        <li><a href="https://allurereport.org/docs/vitest/">Allure Vitest integration</a></li>
+        <li><a href="https://docs.github.com/en/actions/tutorials/build-and-test-code/nodejs">GitHub Actions for Node.js</a></li>
+        <li><a href="https://learn.microsoft.com/en-us/iis/manage/creating-websites/scenario-build-a-static-website-on-iis">Microsoft IIS static website guide</a></li>
+      </ul>
+      <p class="footer-note">End of handbook — reusable Angular testing and quality automation implementation guide, edition 1.0.</p>
+    </main>
+  </body>
+</html>
