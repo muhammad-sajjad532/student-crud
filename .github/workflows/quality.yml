@@ -1,0 +1,49 @@
+name: Quality checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CI: 'true'
+      NG_CLI_ANALYTICS: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.18.0'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Check formatting
+        run: npm run format:check
+      - name: Test, coverage and result gates
+        id: tests
+        run: npm run test:ci
+      - name: Generate Allure report (including failed tests)
+        if: ${{ !cancelled() && steps.tests.outcome != 'skipped' }}
+        run: npm run allure:generate
+      - name: Production build
+        run: npm run build
+      - name: Preserve coverage and test reports
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            coverage/
+            test-results/
+            allure-results/
+            allure-report/
+          if-no-files-found: warn
+          retention-days: 14

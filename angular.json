@@ -2,7 +2,8 @@
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
   "cli": {
-    "packageManager": "npm"
+    "packageManager": "npm",
+    "analytics": "30026b90-7764-4cdf-8ada-dd8ca2761a13"
   },
   "newProjectRoot": "projects",
   "projects": {
@@ -29,9 +30,7 @@
                 "input": "public"
               }
             ],
-            "styles": [
-              "src/styles.scss"
-            ],
+            "styles": ["src/styles.scss"],
             "server": "src/main.server.ts",
             "outputMode": "server",
             "security": {
@@ -78,7 +77,27 @@
           "defaultConfiguration": "development"
         },
         "test": {
-          "builder": "@angular/build:unit-test"
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "progress": false,
+            "runnerConfig": "vitest.config.ts",
+            "isolate": true,
+            "coverageInclude": ["src/app/**/*.ts", "src/app/**/*.html"],
+            "coverageExclude": [
+              "**/*.spec.ts",
+              "**/*.model.ts",
+              "**/app.config*.ts",
+              "**/app.routes*.ts"
+            ],
+            "coverageReporters": ["text", "text-summary", "html", "lcov", "json-summary"],
+            "coverageThresholds": {
+              "perFile": true,
+              "statements": 100,
+              "branches": 100,
+              "functions": 100,
+              "lines": 100
+            }
+          }
         }
       }
     }
