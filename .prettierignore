@@ -6,4 +6,5 @@ coverage/
 allure-results/
 allure-report/
 test-results/
+docs/ANGULAR-VITEST-QUALITY-IIS-GUIDE.html
 package-lock.json

@@ -68,6 +68,8 @@ This folder is the Git repository root; workflow paths are relative to it. GitHu
 
 ## Learn the implementation
 
+- [Formal implementation and handover guide (PDF)](docs/ANGULAR-VITEST-QUALITY-IIS-GUIDE.pdf)
+- [Editable HTML source for the formal guide](docs/ANGULAR-VITEST-QUALITY-IIS-GUIDE.html)
 - [Student CRUD and test basics](TESTING.md)
 - [Step-by-step Roman Urdu workshop: ticket concepts, implementation and team-lead demo](docs/TESTING-WORKSHOP.md)
 - [Test conventions and recipes for components, services, HTTP mocks, pipes, directives and utilities](docs/TESTING-RECIPES.md)

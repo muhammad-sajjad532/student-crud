@@ -12,6 +12,7 @@ export class StudentsComponent {
   readonly students = signal<Student[]>([
     { id: 1, name: 'Ali' },
     { id: 2, name: 'Sara' },
+    { id: 3, name: 'John' },
   ]);
 
   name = '';
