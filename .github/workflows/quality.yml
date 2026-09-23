@@ -35,6 +35,17 @@ jobs:
         run: npm run allure:generate
       - name: Production build
         run: npm run build
+      - name: Build IIS deployment package
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+        run: npm run build:iis
+      - name: Preserve IIS deployment package
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: iis-site-${{ github.sha }}
+          path: dist/angular-testing-iis/browser/
+          if-no-files-found: error
+          retention-days: 7
       - name: Preserve coverage and test reports
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
@@ -47,3 +58,57 @@ jobs:
             allure-report/
           if-no-files-found: warn
           retention-days: 14
+
+  deploy-iis:
+    name: Deploy to local IIS
+    needs: quality
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+    runs-on: [self-hosted, Windows, X64, iis-deploy]
+    timeout-minutes: 10
+    environment: local-iis
+    env:
+      DEPLOY_TARGET: C:\inetpub\student-crud
+      DEPLOY_URL: http://127.0.0.1:8080/
+    steps:
+      - name: Download validated IIS package
+        uses: actions/download-artifact@v4
+        with:
+          name: iis-site-${{ github.sha }}
+          path: iis-package
+      - name: Publish static files to IIS
+        shell: powershell
+        run: |
+          $deploySource = (Resolve-Path -LiteralPath "iis-package").Path
+          $deployTarget = [System.IO.Path]::GetFullPath($env:DEPLOY_TARGET)
+          $expectedTarget = 'C:\inetpub\student-crud'
+
+          if ($deployTarget -ne $expectedTarget) {
+            throw "Unexpected IIS deployment target: $deployTarget"
+          }
+
+          if (-not (Test-Path -LiteralPath (Join-Path $deploySource 'index.html') -PathType Leaf)) {
+            throw "The deployment package does not contain index.html."
+          }
+
+          if (-not (Test-Path -LiteralPath $deployTarget -PathType Container)) {
+            throw "The IIS deployment directory does not exist: $deployTarget"
+          }
+
+          robocopy $deploySource $deployTarget /MIR /R:2 /W:2
+          $robocopyExitCode = $LASTEXITCODE
+
+          if ($robocopyExitCode -ge 8) {
+            throw "IIS deployment failed. Robocopy exit code: $robocopyExitCode"
+          }
+
+          $global:LASTEXITCODE = 0
+      - name: Verify IIS response
+        shell: powershell
+        run: |
+          $response = Invoke-WebRequest -Uri $env:DEPLOY_URL -UseBasicParsing -TimeoutSec 15
+
+          if ($response.StatusCode -ne 200) {
+            throw "IIS smoke test failed with HTTP $($response.StatusCode)."
+          }
+
+          Write-Host "IIS deployment verified: HTTP $($response.StatusCode)"
